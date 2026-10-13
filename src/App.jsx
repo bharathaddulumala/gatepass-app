@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { User, CheckSquare, ShieldCheck, ShieldAlert } from 'lucide-react';
 
 export default function App() {
   const [role, setRole] = useState('STUDENT'); 
   const [requests, setRequests] = useState([]);
   
-  // Student input state fields
   const [studentName, setStudentName] = useState('');
   const [rollNumber, setRollNumber] = useState('');
   const [reason, setReason] = useState('');
   const [myPass, setMyPass] = useState(null);
 
-  // Automatically fetch data whenever the dashboard role changes
   useEffect(() => {
     fetchLiveRequests();
   }, [role]);
@@ -41,7 +38,6 @@ export default function App() {
       setMyPass(newPass);
       alert("Application sent to your Mentor's dashboard successfully!");
       
-      // Clear inputs
       setStudentName('');
       setRollNumber('');
       setReason('');
@@ -62,7 +58,6 @@ export default function App() {
         alert(`${currentRole} action submitted successfully!`);
         fetchLiveRequests();
         
-        // If updating the student's active pass status, refresh the view
         if (myPass && myPass._id === id) {
           const updatedPass = await res.json();
           setMyPass(updatedPass);
@@ -74,108 +69,104 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-800">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', fontFamily: 'sans-serif', color: '#334155', margin: 0 }}>
       {/* Top Navbar */}
-      <header className="bg-indigo-900 text-white p-4 shadow-md flex justify-between items-center">
-        <h1 className="text-xl font-bold flex items-center gap-2">🏢 Campus Gatepass Portal</h1>
-        <div className="flex items-center gap-2 bg-indigo-800 p-2 rounded border border-indigo-700">
-          <span className="text-xs font-mono uppercase tracking-wider text-indigo-200">Simulate Identity Dashboard:</span>
+      <header style={{ backgroundColor: '#1e1b4b', color: 'white', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ margin: 0, fontSize: '20px' }}>🏢 Campus Gatepass Portal</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#3730a3', padding: '8px', borderRadius: '4px' }}>
+          <span style={{ fontSize: '12px', color: '#e0e7ff' }}>Simulate Identity:</span>
           <select 
             value={role} 
             onChange={(e) => setRole(e.target.value)}
-            className="bg-indigo-950 text-white rounded p-1 text-sm border-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+            style={{ backgroundColor: '#4338ca', color: 'white', border: 'none', padding: '4px', borderRadius: '4px', cursor: 'pointer' }}
           >
-            <option value="STUDENT">👨‍🎓 Student Screen</option>
-            <option value="MENTOR">👩‍🏫 Mentor Approval Queue</option>
-            <option value="DEAN">👨‍💼 Dean Sign-Off Desk</option>
+            <option value="STUDENT">Student Screen</option>
+            <option value="MENTOR">Mentor Approval Queue</option>
+            <option value="DEAN">Dean Sign-Off Desk</option>
           </select>
         </div>
       </header>
 
-      <main className="p-6 max-w-4xl mx-auto">
-        {/* STUDENT DASHBOARD */}
+      <main style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+        {/* STUDENT VIEW */}
         {role === 'STUDENT' && (
-          <div className="grid md:grid-cols-2 gap-6 items-start">
-            <form onSubmit={handleStudentSubmit} className="bg-white rounded-xl shadow-md p-6 space-y-4">
-              <h2 className="text-lg font-bold border-b pb-2 mb-2 flex items-center gap-2"><User size={20}/> Submit Out-Pass Request</h2>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name</label>
-                <input type="text" placeholder="John Doe" value={studentName} onChange={e => setStudentName(e.target.value)} className="w-full border rounded p-2 focus:outline-indigo-600" />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <form onSubmit={handleStudentSubmit} style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+              <h2 style={{ marginTop: 0, borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', fontSize: '18px' }}>Submit Out-Pass Request</h2>
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Full Name</label>
+                <input type="text" placeholder="John Doe" value={studentName} onChange={e => setStudentName(e.target.value)} style={{ width: '100%', padding: '8px', boxSizing: 'border-box', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Roll Number</label>
-                <input type="text" placeholder="22CS045" value={rollNumber} onChange={e => setRollNumber(e.target.value)} className="w-full border rounded p-2 focus:outline-indigo-600" />
+              <div style={{ marginBottom: '12px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Roll Number</label>
+                <input type="text" placeholder="22CS045" value={rollNumber} onChange={e => setRollNumber(e.target.value)} style={{ width: '100%', padding: '8px', boxSizing: 'border-box', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Reason for Leaving Campus</label>
-                <input type="text" placeholder="Medical emergency checkup / Family event" value={reason} onChange={e => setReason(e.target.value)} className="w-full border rounded p-2 focus:outline-indigo-600" />
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>Reason</label>
+                <input type="text" placeholder="Medical emergency checkup" value={reason} onChange={e => setReason(e.target.value)} style={{ width: '100%', padding: '8px', boxSizing: 'border-box', border: '1px solid #cbd5e1', borderRadius: '4px' }} />
               </div>
-              <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-2 rounded hover:bg-indigo-700 transition">
+              <button type="submit" style={{ width: '100%', backgroundColor: '#4f46e5', color: 'white', border: 'none', padding: '10px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer' }}>
                 Send to Database
               </button>
             </form>
 
-            {/* Dynamic Card Display */}
-            <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center bg-white shadow-md">
-              <h3 className="font-bold text-xs text-slate-400 uppercase tracking-wide mb-3">Your Live Gatepass Ticket</h3>
+            {/* Ticket Card View */}
+            <div style={{ backgroundColor: 'white', border: '2px dashed #cbd5e1', borderRadius: '12px', padding: '24px', textAlign: 'center', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+              <h3 style={{ marginTop: 0, fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase' }}>Your Live Gatepass Ticket</h3>
               {myPass ? (
-                <div className="space-y-4">
-                  <div className="text-left bg-slate-50 p-3 rounded text-sm space-y-1">
-                    <p><strong>Name:</strong> {myPass.studentName}</p>
-                    <p><strong>Roll:</strong> {myPass.rollNumber}</p>
-                    <p><strong>Reason:</strong> {myPass.reason}</p>
-                    <p><strong>Mentor Signature:</strong> <span className="font-semibold">{myPass.mentorStatus}</span></p>
-                    <p><strong>Dean Signature:</strong> <span className="font-semibold">{myPass.deanStatus}</span></p>
+                <div>
+                  <div style={{ textAlign: 'left', backgroundColor: '#f8fafc', padding: '12px', borderRadius: '6px', fontSize: '14px', marginBottom: '16px' }}>
+                    <p style={{ margin: '4px 0' }}><strong>Name:</strong> {myPass.studentName}</p>
+                    <p style={{ margin: '4px 0' }}><strong>Roll:</strong> {myPass.rollNumber}</p>
+                    <p style={{ margin: '4px 0' }}><strong>Reason:</strong> {myPass.reason}</p>
+                    <p style={{ margin: '4px 0' }}><strong>Mentor Status:</strong> {myPass.mentorStatus}</p>
+                    <p style={{ margin: '4px 0' }}><strong>Dean Status:</strong> {myPass.deanStatus}</p>
                   </div>
                   {myPass.overallStatus === 'APPROVED' ? (
-                    <div className="bg-emerald-50 p-4 inline-block rounded-lg border border-emerald-200">
-                      <QRCodeSVG value={`VALIDATED-PASSID-${myPass._id}`} size={150} />
-                      <p className="text-xs text-emerald-700 font-bold mt-2">✓ Access Code Generated. Ready for Gate Entry Scan.</p>
+                    <div style={{ backgroundColor: '#ecfdf5', padding: '16px', borderRadius: '8px', display: 'inline-block', border: '1px solid #a7f3d0' }}>
+                      <QRCodeSVG value={`VALIDATED-PASSID-${myPass._id}`} size={140} />
+                      <p style={{ fontSize: '12px', color: '#047857', fontWeight: 'bold', margin: '8px 0 0 0' }}>✓ Access Code Generated. Ready for Gate Entry Scan.</p>
                     </div>
                   ) : (
-                    <div className="p-4 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs">
+                    <div style={{ padding: '12px', backgroundColor: '#fffbeb', color: '#b45309', border: '1px solid #fde68a', borderRadius: '6px', fontSize: '12px' }}>
                       ⏳ Pending management authorization checkpoints. The barcode will pop up here once both approve.
                     </div>
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-slate-400 py-12">No active application submissions found in your tracking view session.</p>
+                <p style={{ color: '#94a3b8', paddingTop: '40px' }}>No active submissions found.</p>
               )}
             </div>
           </div>
         )}
 
-        {/* MANAGEMENT PORTALS (MENTOR / DEAN) */}
+        {/* MANAGEMENT QUEUES */}
         {(role === 'MENTOR' || role === 'DEAN') && (
-          <div className="bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-lg font-bold border-b pb-2 mb-4 flex items-center gap-2">
-              <CheckSquare size={20}/> {role === 'MENTOR' ? 'Mentor Verification Queue' : 'Dean Final Authorization Portal'}
+          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+            <h2 style={{ marginTop: 0, borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', fontSize: '18px' }}>
+              {role === 'MENTOR' ? 'Mentor Verification Queue' : 'Dean Final Authorization Portal'}
             </h2>
-            <div className="grid gap-4">
+            <div style={{ display: 'grid', gap: '12px', marginTop: '16px' }}>
               {requests.filter(r => role === 'MENTOR' ? r.mentorStatus === 'PENDING' : r.mentorStatus === 'APPROVED' && r.deanStatus === 'PENDING').map(req => (
-                <div key={req._id} className="border p-4 rounded-lg shadow-sm flex justify-between items-center bg-slate-50">
+                <div key={req._id} style={{ border: '1px solid #e2e8f0', padding: '16px', borderRadius: '8px', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 className="font-bold text-slate-700">{req.studentName} ({req.rollNumber})</h3>
-                    <p className="text-sm text-slate-600 mt-0.5"><span className="font-medium text-slate-500">Reason:</span> {req.reason}</p>
-                    {role === 'DEAN' && <p className="text-xs text-emerald-600 font-medium mt-1">✓ Endorsed by Mentor</p>}
+                    <h3 style={{ margin: 0, color: '#334155', fontSize: '16px' }}>{req.studentName} ({req.rollNumber})</h3>
+                    <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#64748b' }}><strong>Reason:</strong> {req.reason}</p>
+                    {role === 'DEAN' && <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#059669', fontWeight: 'bold' }}>✓ Endorsed by Mentor</p>}
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => handleApprovalAction(req._id, role, 'APPROVED')} className="bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-emerald-700 transition">
-                      Accept
-                    </button>
-                    <button onClick={() => handleApprovalAction(req._id, role, 'REJECTED')} className="bg-rose-600 text-white text-xs font-bold px-3 py-2 rounded hover:bg-rose-700 transition">
-                      Deny
-                    </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={() => handleApprovalAction(req._id, role, 'APPROVED')} style={{ backgroundColor: '#059669', color: 'white', border: 'none', padding: '8px 12px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Accept</button>
+                    <button onClick={() => handleApprovalAction(req._id, role, 'REJECTED')} style={{ backgroundColor: '#dc2626', color: 'white', border: 'none', padding: '8px 12px', fontWeight: 'bold', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Deny</button>
                   </div>
                 </div>
               ))}
-              {requests.filter(r => role === 'MENTOR' ? r.mentorStatus === 'PENDING' : r.mentorStatus === 'APPROVED' && r.deanStatus === 'PENDING').length === 0 && (
-                <p className="text-slate-400 flex items-center gap-2 text-sm justify-center py-8"><ShieldAlert size={18}/> Review workflow items queue is empty.</p>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
-  );
+{requests.filter(r => role === 'MENTOR' ? r.mentorStatus === 'PENDING' : r.mentorStatus === 'APPROVED' && r.deanStatus === 'PENDING').length === 0 && (
+<p style={{ color: '#94a3b8', textAlign: 'center', padding: '24px 0', margin: 0, fontSize: '14px' }}>Queue is completely empty.
+)}
+
+
+)}
+
+
+);
 }
