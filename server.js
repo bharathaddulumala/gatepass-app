@@ -7,13 +7,24 @@ const GatePass = require('./models/GatePass');
 
 const app = express();
 
-app.use(cors());
+// Configure CORS to permit your specific live Vercel frontend website link
+app.use(cors({
+  origin: 'https://vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Establish connection to MongoDB Atlas Cloud Database
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("🔥 Successfully connected to MongoDB Atlas Cloud Database!"))
   .catch((err) => console.error("❌ Database connection error failure:", err));
+
+// Fallback home check route
+app.get('/', (req, res) => {
+  res.send("Gatepass API server is running and accepting live Vercel connections!");
+});
 
 // 1. Submit Request API (Student)
 app.post('/api/gatepass/request', async (req, res) => {
