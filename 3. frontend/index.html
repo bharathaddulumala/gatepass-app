@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Gate Pass System</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; background-color: #f3f4f6; }
+        .section { background: white; padding: 20px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h2 { color: #1e3a8a; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+        input, textarea, button { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
+        button { background-color: #2563eb; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #fff; }
+        th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; }
+        th { background-color: #f9fafb; color: #374151; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .pending-mentor { background: #fef3c7; color: #d97706; }
+        .pending-dean { background: #e0f2fe; color: #0284c7; }
+        .approved { background: #dcfce7; color: #16a34a; }
+        .rejected { background: #fee2e2; color: #dc2626; }
+        .red-flag-row { background-color: #fef2f2; border: 2px solid #ef4444; }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align: center; color: #1e3a8a;">🏛️ Advanced Afternoon Gate Pass System</h1>
+
+    <!-- SECTION 1: STUDENT VIEW -->
+    <div class="section">
+        <h2>📝 1. Student Request Form</h2>
+        <form id="studentForm">
+            <input type="text" id="stuName" placeholder="Full Name" required>
+            <input type="text" id="stuRoll" placeholder="Roll Number / ID" required>
+            <textarea id="stuReason" placeholder="Reason for requesting afternoon permission" required></textarea>
+            <button type="submit">Send to Mentor</button>
+        </form>
+        <p id="studentMsg" style="color: #16a34a; font-weight: bold;"></p>
+    </div>
+
+    <!-- SECTION 2: MENTOR DASHBOARD -->
+    <div class="section">
+        <h2>🧑‍🏫 2. Mentor Approval Board</h2>
+        <table id="mentorTable">
+            <thead>
+                <tr><th>Student</th><th>Reason</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 3: DEAN DASHBOARD -->
+    <div class="section">
+        <h2>🎓 3. Dean Decision Panel</h2>
+        <table id="deanTable">
+            <thead>
+                <tr><th>Student</th><th>Reason</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 4: DEAN WEEKLY ANALYTICS REPORT -->
+    <div class="section" style="border-left: 5px solid #ef4444;">
+        <h2>📊 4. Dean Weekly Analytics & Red Flags</h2>
+        <button onclick="fetchWeeklyReport()" style="background-color: #4b5563; width: auto; padding: 8px 15px;">Fetch Weekly Report</button>
+        <table id="reportTable">
+            <thead>
+                <tr><th>Student Name</th><th>Roll Number</th><th>Requests (Last 7 Days)</th><th>Risk Alert</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- SECTION 5: SECURITY GATE CHECK -->
+    <div class="section" style="background-color: #1f2937; color: white;">
+        <h2 style="color: #f9fafb;">🚨 5. Security Gate Verifier</h2>
+        <input type="text" id="searchRoll" placeholder="Scan or Type Student Roll Number" style="color: black;">
+        <button onclick="checkSecurityGate()" style="background-color: #10b981;">Verify Permissions Status</button>
+        <div id="gateResult" style="margin-top: 15px; font-size: 18px; font-weight: bold;"></div>
+    </div>
+
+    <script>
+        // CHANGE THIS URL to your real Render backend web service URL when deploying!
+        const API_URL = "https://onrender.com";
+
+        // Helper string classifier for styling tags
+        function getBadgeClass(status) {
+            if(status === 'Pending Mentor') return 'badge pending-mentor';
+            if(status === 'Pending Dean') return 'badge pending-dean';
+            if(status === 'Approved by Dean') return 'badge approved';
+            return 'badge rejected';
+        }
+
+        // Student Form Submit Action
+        document.getElementById('studentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                student_name: document.getElementById('stuName').value,
+                roll_number: document.getElementById('stuRoll').value,
+                reason: document.getElementById('stuReason').value
+            };
+            const res = await fetch(`${API_URL}/api/passes/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            document.getElementById('studentMsg').innerText = data.message;
+            document.getElementById('studentForm').reset();
+            refreshData();
+        });
+
+        // Main synchronization function to gather workflows
+        async function refreshData() {
+            const res = await fetch(`${API_URL}/api/passes/`);
+            const passes = await res.json();
+            
+            const mentorBody = document.querySelector('#mentorTable tbody');
+            const deanBody = document.querySelector('#deanTable tbody');
+            mentorBody.innerHTML = '';
+            deanBody.innerHTML = '';
+
+            passes.forEach(p => {
+                // Populate Mentor Table
+                if (p.status === "Pending Mentor") {
+                    mentorBody.innerHTML += `<tr>
+                        <td>${p.student_name} (${p.roll_number})</td>
+                        <td>${p.reason}</td>
+                        <td><span class="${getBadgeClass(p.status)}">${p.status}</span></td>
+                        <td>
+                            <button onclick="updateStatus(${p.id}, 'Pending Dean')" style="background-color:#16a34a; padding:5px; margin-bottom:2px;">Pass to Dean</button>
+                            <button onclick="updateStatus(${p.id}, 'Rejected by Mentor')" style="background-color:#dc2626; padding:5px;">Reject</button>
+                        </td>
+                    </tr>`;
+                }
+                
+                // Populate Dean Table
+                if (p.status === "Pending Dean" || p.status === "Approved by Dean" || p.status === "Rejected by Dean") {
+                    let actions = p.status === "Pending Dean" ? `
+                        <button onclick="updateStatus(${p.id}, 'Approved by Dean')" style="background-color:#16a34a; padding:5px; margin-bottom:2px;">Approve</button>
+                        <button onclick="updateStatus(${p.id}, 'Rejected by Dean')" style="background-color:#dc2626; padding:5px;">Reject</button>
+                    ` : 'Decision Handled';
+
+                    deanBody.innerHTML += `<tr>
+                        <td>${p.student_name} (${p.roll_number})</td>
+                        <td>${p.reason}</td>
+                        <td><span class="${getBadgeClass(p.status)}">${p.status}</span></td>
+                        <td>${actions}</td>
+                    </tr>`;
+                }
+            });
+        }
+
+        async function updateStatus(id, newStatus) {
+            await fetch(`${API_URL}/api/passes/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            refreshData();
+            fetchWeeklyReport();
+        }
+
+        // Security Gate Checker Logic
+        async function checkSecurityGate() {
+            const roll = document.getElementById('searchRoll').value;
+            const res = await fetch(`${API_URL}/api/security/${roll}`);
+            const data = await res.json();
+            const box = document.getElementById('gateResult');
+            
+            if(data.status === "No Record Found") {
+                box.innerHTML = `<span style="color: #ef4444;">❌ ACCESS DENIED: No record matching this registration identifier.</span>`;
+            } else if(data.allowed_to_leave) {
+                box.innerHTML = `<span style="color: #10b981;">✅ ALLOW TO LEAVE: Pass cleared by Dean for student ${data.student_name}.</span>`;
+            } else {
+                box.innerHTML = `<span style="color: #f59e0b;">❌ HOLD STUDENT: Current record status is [${data.status}]. Outbound transition forbidden.</span>`;
+            }
+        }
+
+        // Fetch Dean Reports with Flag Alerts
+        async function fetchWeeklyReport() {
+            const res = await fetch(`${API_URL}/api/dean/weekly-report`);
+            const data = await res.json();
+            const tbody = document.querySelector('#reportTable tbody');
+            tbody.innerHTML = '';
+            
+            data.forEach(r => {
+                let rowStyle = r.red_flag ? 'class="red-flag-row"' : '';
+                let alertText = r.red_flag ? '🚩 RED FLAG: High Frequency Repeat Violator' : '💚 Normal Active Level';
+                tbody.innerHTML += `<tr ${rowStyle}>
+                    <td>${r.student_name}</td>
+                    <td>${r.roll_number}</td>
+                    <td><strong>${r.count_this_week} Times</strong></td>
+                    <td><strong>${alertText}</strong></td>
+                </tr>`;
+            });
+        }
+
+        // Initialize state fields on load
+        refreshData();
+        fetchWeeklyReport();
+    </script>
+</body>
+</html>
