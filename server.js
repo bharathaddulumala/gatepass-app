@@ -7,11 +7,11 @@ const GatePass = require('./models/GatePass');
 
 const app = express();
 
-// Configure CORS to permit your specific live Vercel frontend website link
+// Open the API completely to any front-end source links to prevent dynamic link mismatch errors
 app.use(cors({
-  origin: 'https://vercel.app',
+  origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -23,7 +23,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Fallback home check route
 app.get('/', (req, res) => {
-  res.send("Gatepass API server is running and accepting live Vercel connections!");
+  res.send("Gatepass API server is running globally and accepting all connections!");
 });
 
 // 1. Submit Request API (Student)
