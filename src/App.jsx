@@ -16,7 +16,7 @@ export default function App() {
 
   const fetchLiveRequests = async () => {
     try {
-      const res = await fetch('https://onrender.com');
+      const res = await fetch('https://gatepass-backend-e8h7.onrender.com');
       const data = await res.json();
       setRequests(data);
     } catch (err) {
@@ -49,7 +49,7 @@ export default function App() {
 
   const handleApprovalAction = async (id, currentRole, actionValue) => {
     try {
-      const res = await fetch(`https://onrender.com{id}`, {
+      const res = await fetch(`https://gatepass-backend-e8h7.onrender.com{id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: currentRole, action: actionValue })
