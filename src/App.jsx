@@ -19,7 +19,7 @@ export default function App() {
 
   const fetchLiveRequests = async () => {
     try {
-      const res = await fetch('https://onrender.com');
+      const res = await fetch('https://gatepass-liw2ak5t2-vce6.vercel.app/');
       const data = await res.json();
       setRequests(data);
     } catch (err) {
@@ -32,7 +32,7 @@ export default function App() {
     if (!studentName || !rollNumber || !reason) return alert("Please fill all student details.");
 
     try {
-      const res = await fetch('https://onrender.com', {
+      const res = await fetch('https://gatepass-liw2ak5t2-vce6.vercel.app/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ studentName, rollNumber, reason })
@@ -53,7 +53,7 @@ export default function App() {
 
   const handleApprovalAction = async (id, currentRole, actionValue) => {
     try {
-      const res = await fetch(`https://onrender.com{id}`, {
+      const res = await fetch(`https://gatepass-liw2ak5t2-vce6.vercel.app/{id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: currentRole, action: actionValue })
